@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+
+  binaryTargets   = "native"
+  // preview features to enable if not on v4:
+  previewFeatures = ["extendedIndexes", "improvedQueryRaw"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Kitchen {
+  id            Int                                  @id @default(autoincrement())
+  name          String
+  address       String
+  account_id    Int
+  status        Int                                  @default(3) // 1 => Inactive, 2 => Blocked, 3 => Active, 4 => Pending 
+  subscriptions Subscription[]
+  coords        Unsupported("geometry(Point, 4326)")
+  createdAt     DateTime                             @default(now())
+  updatedAt     DateTime                             @default(now()) @updatedAt
+  deletedAt     DateTime?                            @db.Timestamptz()
+
+  @@index([coords], name: "location_idx", type: Gist)
+}
+
+// need to add plan_type (monthly, yearly)
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  kitchen     Kitchen   @relation(fields: [kitchen_id], references: [id])
+  type        Int       @default(1)
+  name String
+  description String
+  image_url String?
+  price       Int?
+  plan_type Int
+  allowedUser Int
+  kitchen_id  Int
+  meals       Meal[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  deletedAt   DateTime? @db.Timestamptz()
+}
+
+model Meal {
+  id              Int          @id @default(autoincrement())
+  name            String
+  description     String
+  subscription    Subscription @relation(fields: [subscription_id], references: [id])
+  subscription_id Int
+  nutrition       Nutrition?
+  ingredients     Ingredient[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @default(now()) @updatedAt
+  deletedAt       DateTime?    @db.Timestamptz()
+}
+
+model Nutrition {
+  id            Int  @id @default(autoincrement())
+  calories      Int?
+  fat           Int?
+  saturated_fat Int?
+  carbohydrate  Int?
+  sugar         Int?
+  dietary_fiber Int?
+  protine       Int?
+  cholesterol   Int?
+  sodium        Int?
+  user          Meal @relation(fields: [meal_id], references: [id])
+  meal_id       Int  @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime? @db.Timestamptz()
+}
+
+model Ingredient {
+  id          Int       @id @default(autoincrement())
+  name        String
+  image       String?
+  description String
+  meal_id     Int
+  meal        Meal      @relation(fields: [meal_id], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  deletedAt   DateTime? @db.Timestamptz()
+}
+
+model SnappyAccount {
+  id        Int       @id @default(autoincrement())
+  status    Int       @default(3) // 1 => Inactive, 2 => Blocked, 3 => Active, 4 => Pending 
+  admin_id  Int?
+  user_ids  Int[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime? @db.Timestamptz()
+}

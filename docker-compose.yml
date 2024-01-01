@@ -1,0 +1,35 @@
+version: '3.3'
+services:
+    snappy-kitchen-db:
+        image: 'mdillon/postgis:10-alpine'
+        container_name: snappy-kitchen-db
+        ports:
+            - 5433:5432
+        # networks:
+        #     - swiftsales
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASS=click123
+            - POSTGRES_DB=snappy-kitchen
+    rabbitmq:
+        image: rabbitmq:3.10-rc-management-alpine
+        container_name: rabbitmq
+        ports:
+        # AMQP protocol port
+        - "5672:5672"
+        # HTTP management UI
+        - "15672:15672"
+        env_file:
+        - ./.env
+    snappy-server:
+        image: snappy-kitchen-server
+        container_name: snappy-kitchen-server
+        ports:
+        - '3500:3500'
+        restart: always
+        depends_on:
+        - snappy-kitchen-db
+        - rabbitmq
+        command: ["npm", "run","start:dev"]
+        env_file:
+        - ./.env
