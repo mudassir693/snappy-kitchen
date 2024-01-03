@@ -34,11 +34,11 @@ model Subscription {
   id          Int       @id @default(autoincrement())
   kitchen     Kitchen   @relation(fields: [kitchen_id], references: [id])
   type        Int       @default(1)
-  name String
+  name        String
   description String
-  image_url String?
+  image_url   String?
   price       Int?
-  plan_type Int
+  plan_type   Int // 1=> monthly, 2=>yearly
   allowedUser Int
   kitchen_id  Int
   meals       Meal[]

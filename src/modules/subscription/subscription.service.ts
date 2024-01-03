@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ClientProxy } from "@nestjs/microservices";
 import { Subscription } from "@prisma/client";
 import { DatabaseService } from "src/database/database.service";
 
 @Injectable()
 export class SubscriptionService {
-    constructor(private _dbService: DatabaseService){}
+    constructor(private _dbService: DatabaseService, @Inject("BILLING") private _billingClient: ClientProxy){}
 
     async createSubscription(data: any){
         try {
@@ -30,6 +31,7 @@ export class SubscriptionService {
                         allowedUser: 100
                     }
                 })
+                this._billingClient.emit('subscription_create', create_subscription)
             } catch (error) {
                 throw new BadRequestException(error.message)
             }

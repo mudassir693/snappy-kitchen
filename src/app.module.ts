@@ -20,7 +20,7 @@ import { NutritionModule } from './modules/nutrition/nutrition.module';
     MealModule,
     IngredientModule,
     NutritionModule,
-    // RmqModule,
+    RmqModule.register({name: "KITCHEN"}),
     ConfigModule.forRoot({isGlobal: true}),
     JwtModule.register({
       global: true,

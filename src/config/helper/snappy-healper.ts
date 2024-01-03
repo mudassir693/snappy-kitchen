@@ -2,7 +2,6 @@ import axios from 'axios';
 
 let Get = async (url: string)=>{
     let resp =  await axios.get(url)
-    console.log(resp)
     return resp
 }
 
