@@ -21,15 +21,15 @@ services:
         - "15672:15672"
         env_file:
         - ./.env
-    snappy-server:
-        image: snappy-kitchen-server
-        container_name: snappy-kitchen-server
-        ports:
-        - '3500:3500'
-        restart: always
-        depends_on:
-        - snappy-kitchen-db
-        - rabbitmq
-        command: ["npm", "run","start:dev"]
-        env_file:
-        - ./.env
+    # snappy-server:
+    #     image: snappy-kitchen-server
+    #     container_name: snappy-kitchen-server
+    #     ports:
+    #     - '3500:3500'
+    #     restart: always
+    #     depends_on:
+    #     - snappy-kitchen-db
+    #     - rabbitmq
+    #     command: ["npm", "run","start:dev"]
+    #     env_file:
+    #     - ./.env

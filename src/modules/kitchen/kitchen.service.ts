@@ -38,17 +38,17 @@ export class KitchenService {
       let createKitchen;
       try {
         createKitchen = await this._dbService.$queryRaw`
-        INSERT INTO "public"."Kitchen" (name, address, account_id, coords)
-        VALUES (
-          ${kitchen.name},
-          ${kitchen.address},
-          ${kitchen.account_id},
-          ST_SetSRID(ST_MakePoint(${kitchen.longitude}, ${kitchen.latitude}), 4326)::text  -- Explicitly cast to text
-        )
-        RETURNING *;
-      `;
-        // createKitchen = await this._dbService.$queryRaw`INSERT INTO Kitchen (name, address, account_id, coords) VALUES (${kitchen.name}, ${kitchen.address}, ${kitchen.account_id}, ST_SetSRID(ST_MakePoint(${kitchen.longitude}, ${kitchen.latitude}), 4326)) RETURNING *;`
+          INSERT INTO "public"."Kitchen" (name, address, account_id, coords)
+          VALUES (
+            ${kitchen.name},
+            ${kitchen.address},
+            ${kitchen.account_id},
+            CAST(ST_SetSRID(ST_MakePoint(${kitchen.longitude}, ${kitchen.latitude}), 4326) AS text)  -- Explicitly cast to text
+          )
+          RETURNING *;
+        `;
       } catch (error) {
+        
         throw new BadRequestException(error.message);
       }
 

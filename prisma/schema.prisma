@@ -21,7 +21,7 @@ model Kitchen {
   account_id    Int
   status        Int                                  @default(3) // 1 => Inactive, 2 => Blocked, 3 => Active, 4 => Pending 
   subscriptions Subscription[]
-  coords        Unsupported("geometry(Point, 4326)")
+  coords        String                               // Change the type to String
   createdAt     DateTime                             @default(now())
   updatedAt     DateTime                             @default(now()) @updatedAt
   deletedAt     DateTime?                            @db.Timestamptz()
