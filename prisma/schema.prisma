@@ -6,7 +6,6 @@ generator client {
 
   binaryTargets   = "native"
   // preview features to enable if not on v4:
-  previewFeatures = ["extendedIndexes", "improvedQueryRaw"]
 }
 
 datasource db {
@@ -25,8 +24,6 @@ model Kitchen {
   createdAt     DateTime                             @default(now())
   updatedAt     DateTime                             @default(now()) @updatedAt
   deletedAt     DateTime?                            @db.Timestamptz()
-
-  @@index([coords], name: "location_idx", type: Gist)
 }
 
 // need to add plan_type (monthly, yearly)
@@ -38,6 +35,7 @@ model Subscription {
   description String
   image_url   String?
   price       Int?
+  account_id    Int
   plan_type   Int // 1=> monthly, 2=>yearly
   allowedUser Int
   kitchen_id  Int

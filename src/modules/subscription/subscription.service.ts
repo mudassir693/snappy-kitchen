@@ -28,6 +28,7 @@ export class SubscriptionService {
                         plan_type: data.plan_type,
                         price: data.price,
                         kitchen_id: data.kitchen_id,
+                        account_id: is_kitchen_available.account_id,
                         allowedUser: 100
                     }
                 })
