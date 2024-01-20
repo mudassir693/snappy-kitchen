@@ -32,7 +32,7 @@ export class KitchenController {
     @UseGuards(JwtAuthGuard)
     @Get('/get')
     async getKitchens(@Query() data: any, @Request() req: any): Promise<any>{
-        let kitchens: Kitchen[] = await this._kitchenService.getKitchens()
+        let kitchens: Kitchen[] = await this._kitchenService.getKitchens(data)
         return {
             token: req.user.token,
             kitchens

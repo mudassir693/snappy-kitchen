@@ -53,6 +53,7 @@ model Meal {
   subscription_id Int
   nutrition       Nutrition?
   ingredients     Ingredient[]
+  kitchen_id      Int
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @default(now()) @updatedAt
   deletedAt       DateTime?    @db.Timestamptz()

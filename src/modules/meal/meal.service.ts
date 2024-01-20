@@ -23,7 +23,8 @@ export class MealService {
                     data:{
                         name: data.name,
                         description: data.description,
-                        subscription_id: data.subscription_id
+                        subscription_id: data.subscription_id,
+                        kitchen_id: is_subscription_available.kitchen_id
                     }
                 })
             } catch (error) {
@@ -38,11 +39,48 @@ export class MealService {
         }
     }
 
+    async updateMeal(data: any, id: any){
+        try {
+            let meal = await this._dbService.meal.findFirst({where: {id}})
+            if(!meal){
+                throw new NotFoundException()
+            }
+            await this._dbService.meal.update({where: {id: meal.id}, data: {
+                ...(data.name && {name: data.name}),
+                ...(data.description && {description: data.description}),
+            }})
+        } catch (error) {
+            
+        }
+    }
+
     async getMealById(id): Promise<Meal>{
         try {
             let meal;
             try {
                 meal = await this._dbService.meal.findUnique({where: {id: parseInt(id)}, include: {ingredients: true, nutrition: true}})
+            } catch (error) {
+                throw new BadRequestException(error.message)
+            }
+            if(!meal){
+                throw new NotFoundException("Invalid meal id")
+            }
+            return meal
+        } catch (error) {
+            throw new BadRequestException(error.message)
+        }
+    }
+
+    // need to work here
+    async getMeal(data): Promise<Meal>{
+        try {
+            let meal;
+            let whereParams = {}
+            if(data.kitchen_id){
+                whereParams['kitchen_id'] = parseInt(data.kitchen_id)
+            }
+            try {
+                meal = await this._dbService.meal.findMany({where: whereParams})
             } catch (error) {
                 throw new BadRequestException(error.message)
             }

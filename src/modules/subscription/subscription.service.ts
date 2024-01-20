@@ -11,7 +11,7 @@ export class SubscriptionService {
         try {
             let is_kitchen_available;
             try {
-                is_kitchen_available = await this._dbService.kitchen.findUnique({where: {id: data.id}})
+                is_kitchen_available = await this._dbService.kitchen.findUnique({where: {id: data.kitchen_id }})
             } catch (error) {
                 throw new NotFoundException(error.message)
             }

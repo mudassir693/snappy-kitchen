@@ -36,21 +36,30 @@ export class KitchenService {
         throw new BadRequestException('Account status is currently not active');
       }
       let createKitchen;
-      try {
-        createKitchen = await this._dbService.$queryRaw`
-          INSERT INTO "public"."Kitchen" (name, address, account_id, coords)
-          VALUES (
-            ${kitchen.name},
-            ${kitchen.address},
-            ${kitchen.account_id},
-            CAST(ST_SetSRID(ST_MakePoint(${kitchen.longitude}, ${kitchen.latitude}), 4326) AS text)  -- Explicitly cast to text
-          )
-          RETURNING *;
-        `;
-      } catch (error) {
+      // try {
+      //   createKitchen = await this._dbService.$queryRaw`
+      //     INSERT INTO "public"."Kitchen" (name, address, account_id, coords)
+      //     VALUES (
+      //       ${kitchen.name},
+      //       ${kitchen.address},
+      //       ${kitchen.account_id},
+      //       CAST(ST_SetSRID(ST_MakePoint(${kitchen.longitude}, ${kitchen.latitude}), 4326) AS text)  -- Explicitly cast to text
+      //     )
+      //     RETURNING *;
+      //   `;
+      // } catch (error) {
         
-        throw new BadRequestException(error.message);
-      }
+      //   throw new BadRequestException(error.message);
+      // }
+
+      createKitchen = await this._dbService.kitchen.create({
+        data: {
+          name: kitchen.name,
+          account_id: kitchen.account_id,
+          address: kitchen.address,
+          coords: "" 
+        }
+      })
 
       return {
         success: true,
@@ -61,17 +70,23 @@ export class KitchenService {
     }
   }
 
-  async getKitchens(): Promise<Kitchen[]>{
+  async getKitchens(querParams: any): Promise<Kitchen[]>{
     try {
+      let whereParams = {
+        status: KitchenStatus.Active
+      }
+      if(querParams.account_id){
+        whereParams['account_id'] = parseInt(querParams.account_id) 
+      }
       let kitchens: Kitchen[];
       try {
-        kitchens = await this._dbService.kitchen.findMany({where: {status: KitchenStatus.Active}})
+        kitchens = await this._dbService.kitchen.findMany({where: whereParams});
       } catch (error) {
         throw new BadRequestException(error.message);
       }
       return kitchens
-    } catch (error) {
-      throw new BadRequestException(error.message);
+    } catch (error){
+      throw new BadRequestException(error.message)
     }
   }
 
