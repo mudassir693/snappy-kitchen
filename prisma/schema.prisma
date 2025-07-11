@@ -18,7 +18,8 @@ model Kitchen {
   name          String
   address       String
   account_id    Int
-  status        Int                                  @default(3) // 1 => Inactive, 2 => Blocked, 3 => Active, 4 => Pending 
+  isRemoteKitchen Boolean
+  status        Int                                @default(3) // 1 => Inactive, 2 => Blocked, 3 => Active, 4 => Pending 
   subscriptions Subscription[]
   coords        String                               // Change the type to String
   createdAt     DateTime                             @default(now())
