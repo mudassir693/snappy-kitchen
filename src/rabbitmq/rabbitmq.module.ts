@@ -18,6 +18,7 @@ export class RmqModule {
       imports: [
         ClientsModule.registerAsync([
           {
+            // hello
             name,
             useFactory: (configService: ConfigService) => ({
               transport: Transport.RMQ,
