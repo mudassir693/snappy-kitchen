@@ -23,6 +23,7 @@ export class KitchenController {
     @Patch('/update/:id')
     async UpdateKitchen(@Body()data: any, @Param('id') id: string, @Request() req: any): Promise<any>{
         let kitchenResponse = await this._kitchenService.updateKitchen(data, id)
+        // console.log('Hello')
         return {
             token: req.user.token,
             kitchenResponse
