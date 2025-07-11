@@ -84,6 +84,7 @@ model Ingredient {
   name        String
   image       String?
   description String
+  isReal: Boolean
   meal_id     Int
   meal        Meal      @relation(fields: [meal_id], references: [id])
   createdAt   DateTime  @default(now())
