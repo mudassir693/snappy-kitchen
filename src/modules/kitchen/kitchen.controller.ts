@@ -4,7 +4,7 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { RmqService } from 'src/rabbitmq/rabbitmq.service';
 import { KitchenService } from './kitchen.service';
 import { Kitchen } from '@prisma/client';
-
+// controller to handle kitchen related routes
 @Controller('kitchen')
 export class KitchenController {
     constructor(private _kitchenService: KitchenService) {}
