@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RmqContext, RmqOptions, Transport } from '@nestjs/microservices';
-
+// rabbit mq
 @Injectable()
 export class RmqService {
   constructor(private readonly configService: ConfigService) {}
