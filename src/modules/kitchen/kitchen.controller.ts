@@ -57,4 +57,14 @@ export class KitchenController {
             kitchenResponse
         }
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete('/delete/all')
+    async DeleteKitchen(@Body()data: any, @Param('id') id: string, @Request() req: any): Promise<any>{
+        let kitchenResponse = await this._kitchenService.deleteKitchen(data, id)
+        return {
+            token: req.user.token,
+            kitchenResponse
+        }
+    }
 }
