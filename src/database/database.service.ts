@@ -3,6 +3,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 // import AppConfig from 'configs/app.config';
 // import { Logger } from 'helpers/logger.helper';
 
+// let a = 10;
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit {
     constructor() {
