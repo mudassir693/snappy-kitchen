@@ -10,159 +10,119 @@ import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class KitchenService {
-  constructor(private _dbService: DatabaseService) {}
+  constructor(private readonly _dbService: DatabaseService) {}
 
-  async createKitchen(kitchen: any) {
-    try {
-      let is_kitchen_available = await this._dbService.kitchen.findFirst({
-        where: { name: kitchen.name },
-      });
-      if (is_kitchen_available) {
-        throw new BadRequestException('Kitchen with this name already exists');
-      }
-      let account_available;
-      try {
-        account_available = await this._dbService.snappyAccount.findFirst({
-          where: { id: kitchen.account_id },
-        }); // 3 => active
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-      if (!account_available) {
-        throw new BadRequestException('Invalid account_id');
-      }
-      if (account_available.status !== AccountStatus.Active) {
-        // 3 => active
-        throw new BadRequestException('Account status is currently not active');
-      }
-      let createKitchen;
-      // try {
-      //   createKitchen = await this._dbService.$queryRaw`
-      //     INSERT INTO "public"."Kitchen" (name, address, account_id, coords)
-      //     VALUES (
-      //       ${kitchen.name},
-      //       ${kitchen.address},
-      //       ${kitchen.account_id},
-      //       CAST(ST_SetSRID(ST_MakePoint(${kitchen.longitude}, ${kitchen.latitude}), 4326) AS text)  -- Explicitly cast to text
-      //     )
-      //     RETURNING *;
-      //   `;
-      // } catch (error) {
-        
-      //   throw new BadRequestException(error.message);
-      // }
+  async createKitchen(kitchen: {
+    name: string;
+    address: string;
+    account_id: number;
+    longitude?: number;
+    latitude?: number;
+  }) {
+    const { name, account_id, address } = kitchen;
 
-      createKitchen = await this._dbService.kitchen.create({
-        data: {
-          name: kitchen.name,
-          account_id: kitchen.account_id,
-          address: kitchen.address,
-          coords: "" 
-        }
-      })
+    // Check if kitchen with the same name already exists
+    const existingKitchen = await this._dbService.kitchen.findFirst({
+      where: { name },
+    });
 
-      return {
-        success: true,
-        kitchen: createKitchen,
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
+    if (existingKitchen) {
+      throw new BadRequestException('Kitchen with this name already exists');
     }
+
+    // Validate account existence and status
+    const account = await this._dbService.snappyAccount.findFirst({
+      where: { id: account_id },
+    });
+
+    if (!account) {
+      throw new BadRequestException('Invalid account_id');
+    }
+
+    if (account.status !== AccountStatus.Active) {
+      throw new BadRequestException('Account status is currently not active');
+    }
+
+    // Create the kitchen
+    const newKitchen = await this._dbService.kitchen.create({
+      data: {
+        name,
+        account_id,
+        address,
+        coords: '', // Placeholder – implement GIS logic here if needed
+      },
+    });
+
+    return {
+      success: true,
+      kitchen: newKitchen,
+    };
   }
 
-  async getKitchens(querParams: any): Promise<Kitchen[]>{
-    try {
-      let whereParams = {
-        status: KitchenStatus.Active
-      }
-      if(querParams.account_id){
-        whereParams['account_id'] = parseInt(querParams.account_id) 
-      }
-      let kitchens: Kitchen[];
-      try {
-        kitchens = await this._dbService.kitchen.findMany({where: whereParams});
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-      return kitchens
-    } catch (error){
-      throw new BadRequestException(error.message)
+  async getKitchens(queryParams: { account_id?: string }): Promise<Kitchen[]> {
+    const whereParams: any = {
+      status: KitchenStatus.Active,
+    };
+
+    if (queryParams.account_id) {
+      whereParams.account_id = parseInt(queryParams.account_id, 10);
     }
+
+    return this._dbService.kitchen.findMany({ where: whereParams });
   }
 
-  async getKitchenById(id: number): Promise<Kitchen>{
-    try {
-      let kitchen: Kitchen;
-      try {
-        kitchen = await this._dbService.kitchen.findUnique({where: {id}})
-      } catch (error) {
-        throw new BadRequestException(error.message)
-      }
-      if(!kitchen){
-        throw new NotFoundException(`Kitchen not found`)
-      }
+  async getKitchenById(id: number): Promise<Kitchen> {
+    const kitchen = await this._dbService.kitchen.findUnique({
+      where: { id },
+    });
 
-      return kitchen
-    } catch (error) {
-      throw new BadRequestException(error.message);
+    if (!kitchen) {
+      throw new NotFoundException('Kitchen not found');
     }
+
+    return kitchen;
   }
 
-  async updateKitchen(data: any, id: string): Promise<{ success: boolean }> {
-    try {
-      let kitchen;
-      try {
-        kitchen = await this._dbService.kitchen.findFirst({
-          where: { id: parseInt(id) },
-        });
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-      if (!kitchen) {
-        throw new NotFoundException('Invalid Kitchen id');
-      }
-      try {
-        await this._dbService.kitchen.update({
-          where: { id: parseInt(id) },
-          data: { 
-                ...(data.name && {name: data.name}),
-                ...(data.address && {address: data.address})
-            },
-        });
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-      return {
-        success: true,
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
+  async updateKitchen(
+    data: { name?: string; address?: string },
+    id: string,
+  ): Promise<{ success: boolean }> {
+    const kitchenId = parseInt(id, 10);
+
+    const kitchen = await this._dbService.kitchen.findUnique({
+      where: { id: kitchenId },
+    });
+
+    if (!kitchen) {
+      throw new NotFoundException('Invalid Kitchen id');
     }
+
+    await this._dbService.kitchen.update({
+      where: { id: kitchenId },
+      data: {
+        ...(data.name && { name: data.name }),
+        ...(data.address && { address: data.address }),
+      },
+    });
+
+    return { success: true };
   }
 
-  async deleteKitchen(data: any, id: string): Promise<{ success: boolean }> {
-    try {
-      let kitchen;
-      try {
-        kitchen = await this._dbService.kitchen.findFirst({
-          where: { id: parseInt(id) },
-        });
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-      if (!kitchen) {
-        throw new NotFoundException('Invalid Kitchen id');
-      }
-      try {
-        await this._dbService.kitchen.delete({where: { id: parseInt(id) }});
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-      return {
-        success: true,
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
+  async deleteKitchen(_data: any, id: string): Promise<{ success: boolean }> {
+    const kitchenId = parseInt(id, 10);
+
+    const kitchen = await this._dbService.kitchen.findUnique({
+      where: { id: kitchenId },
+    });
+
+    if (!kitchen) {
+      throw new NotFoundException('Invalid Kitchen id');
     }
+
+    await this._dbService.kitchen.delete({
+      where: { id: kitchenId },
+    });
+
+    return { success: true };
   }
 }
