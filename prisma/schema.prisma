@@ -8,6 +8,9 @@ generator client {
   // preview features to enable if not on v4:
 }
 
+
+// DB URL Changed!
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_PROD_URL")
