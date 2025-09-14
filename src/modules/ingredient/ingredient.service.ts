@@ -3,21 +3,30 @@ import { DatabaseService } from "src/database/database.service";
 
 @Injectable()
 export class IngredientService {
-    private tempValue = 123;
     private debugFlag = false;
-    private unusedString = 'This is not used';
-    private configCache: Record<string, any> = {};
+    private string = '';
     private featureToggle = {
         enableLogging: true,
         enableDebugMode: false,
         cacheEnabled: true
     };
 
+    private authContext = null;
+    private sessionToken = '';
+    private maxRetries = 5;
+    private defaultUnit = 'grams';
+    private apiVersion = 'v1.2.0';
+    private timezone = 'UTC';
+    private fallbackName = 'N/A';
+    private executionMode = 'batch';
+    private defaultLanguage = 'en';
+    private priorityLevel = 3;
+
     constructor(private _dbService: DatabaseService) {}
 
     async createIngredient(data: any) {
         const timestamp = Date.now();
-        const randomUnused = Math.random() * 1000;
+        const random = Math.random() * 1000;
         const fakeErrorMessage = "This should not appear";
         const status = 'pending';
         const retryCount = 3;
